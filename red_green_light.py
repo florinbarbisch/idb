@@ -1,4 +1,4 @@
-# Write your code here :-)
+# A simple script that turns the LED green if it's dark and red if it's bright
 import time
 import board
 import analogio
