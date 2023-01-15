@@ -1,0 +1,355 @@
+{
+  "name": "LoRa over MQTT",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$node[\"MQTT New Measurement_test\"].json[\"message\"][\"uplink_message\"][\"decoded_payload\"][\"co2\"]}}",
+              "operation": "larger",
+              "value2": 1000
+            }
+          ]
+        }
+      },
+      "id": "6076ed95-64bd-44b6-9066-7d5db88cf0a8",
+      "name": "IF CO2 > 1'000ppm",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1640,
+        620
+      ]
+    },
+    {
+      "parameters": {
+        "lightId": "1",
+        "additionalFields": {
+          "bri": 254,
+          "ct": 500,
+          "hue": 7169,
+          "sat": 225
+        }
+      },
+      "id": "828f5ce1-f8a4-4fca-b0d4-2e2f4d24c0dd",
+      "name": "Philips Hue set white",
+      "type": "n8n-nodes-base.philipsHue",
+      "typeVersion": 1,
+      "position": [
+        1860,
+        820
+      ],
+      "credentials": {
+        "philipsHueOAuth2Api": {
+          "id": "2",
+          "name": "PhilipHue account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "lightId": "1",
+        "additionalFields": {
+          "bri": 254,
+          "hue": 0,
+          "sat": 254
+        }
+      },
+      "id": "da031219-9d83-487a-a29e-40899cd8559d",
+      "name": "Philips Hue set red",
+      "type": "n8n-nodes-base.philipsHue",
+      "typeVersion": 1,
+      "position": [
+        1860,
+        620
+      ],
+      "credentials": {
+        "philipsHueOAuth2Api": {
+          "id": "2",
+          "name": "PhilipHue account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "lightId": "1"
+      },
+      "id": "c88cabc7-d651-490b-a6d2-0de21142e651",
+      "name": "Philips Hue get light status",
+      "type": "n8n-nodes-base.philipsHue",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        620
+      ],
+      "credentials": {
+        "philipsHueOAuth2Api": {
+          "id": "2",
+          "name": "PhilipHue account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json[\"state\"][\"on\"] }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "063fc40c-443f-4291-bd66-fa674fba991e",
+      "name": "Is light on?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        620
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$node[\"MQTT New Measurement_test\"].json[\"message\"][\"uplink_message\"][\"decoded_payload\"][\"co2\"]}}",
+              "value2": 600
+            }
+          ]
+        }
+      },
+      "id": "51967150-d9d9-44d7-b806-aed2b2e2aac4",
+      "name": "IF CO2 < 600ppm",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1640,
+        820
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json[\"message\"][\"co2\"] }}",
+              "operation": "larger",
+              "value2": 1000
+            },
+            {
+              "value1": "={{ $json[\"message\"][\"co2\"] }}",
+              "value2": 600
+            }
+          ]
+        },
+        "combineOperation": "any"
+      },
+      "id": "7b2c2ac1-b3d0-42f7-89ac-82f375b11140",
+      "name": "IF value outside of range 600-1000",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        980,
+        620
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "f70987b1-326c-40d2-a6b0-cf950f0b8927",
+      "name": "MQTT New Measurement_test",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        600,
+        340
+      ]
+    },
+    {
+      "parameters": {
+        "topics": "v3/fhnw-idb@ttn/devices/fhnw-idb-device-0/up",
+        "options": {
+          "jsonParseBody": true
+        }
+      },
+      "id": "b06305eb-7a31-45bd-a8e7-847bb76e35d4",
+      "name": "MQTT New Measurement",
+      "type": "n8n-nodes-base.mqttTrigger",
+      "typeVersion": 1,
+      "position": [
+        760,
+        620
+      ],
+      "credentials": {
+        "mqtt": {
+          "id": "3",
+          "name": "MQTT The Things Network"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "MQTT New Measurement_test": [
+      {
+        "json": {
+          "message": {
+            "end_device_ids": {
+              "device_id": "fhnw-idb-device-0",
+              "application_ids": {
+                "application_id": "fhnw-idb"
+              },
+              "dev_eui": "70B3D57ED00595E5",
+              "dev_addr": "260BEF24"
+            },
+            "correlation_ids": [
+              "as:up:01GPM14AMM8N71R0WGTZJJHNSM",
+              "gs:conn:01GM38NXHBBY1SB2QEX13V8HHN",
+              "gs:up:host:01GM38NXJNH7S9A9EH95V6KVE1",
+              "gs:uplink:01GPM14AE76P5P850F2KSFSYE2",
+              "ns:uplink:01GPM14AE77Y9PP1W564GQ8HCJ",
+              "rpc:/ttn.lorawan.v3.GsNs/HandleUplink:01GPM14AE72W9F0TDCV4VJQWRV",
+              "rpc:/ttn.lorawan.v3.NsAs/HandleUplink:01GPM14AMK5VQ57V6677BZ9FBT"
+            ],
+            "received_at": "2023-01-12T22:20:40.980233071Z",
+            "uplink_message": {
+              "f_port": 1,
+              "f_cnt": 11,
+              "frm_payload": "MjM2OTsyMTc1OzU1Mzg=",
+              "decoded_payload": {
+                "co2": 2369,
+                "humidity": 55.38,
+                "temperature": 21.75
+              },
+              "rx_metadata": [
+                {
+                  "gateway_ids": {
+                    "gateway_id": "bfh-weissenstein",
+                    "eui": "00800000A000006C"
+                  },
+                  "time": "2023-01-12T22:20:40.750366Z",
+                  "timestamp": 2750961059,
+                  "rssi": -120,
+                  "channel_rssi": -120,
+                  "snr": -7.2,
+                  "location": {
+                    "latitude": 47.25238,
+                    "longitude": 7.51047,
+                    "altitude": 1291,
+                    "source": "SOURCE_REGISTRY"
+                  },
+                  "uplink_token": "Ch4KHAoQYmZoLXdlaXNzZW5zdGVpbhIIAIAAAKAAAGwQo6vhnwoaDAi4j4KeBhCm3MLxAiC4ibqQiOO+BQ==",
+                  "received_at": "2023-01-12T22:20:40.774942246Z"
+                }
+              ],
+              "settings": {
+                "data_rate": {
+                  "lora": {
+                    "bandwidth": 125000,
+                    "spreading_factor": 7,
+                    "coding_rate": "4/5"
+                  }
+                },
+                "frequency": "868100000",
+                "timestamp": 2750961059,
+                "time": "2023-01-12T22:20:40.750366Z"
+              },
+              "received_at": "2023-01-12T22:20:40.775696742Z",
+              "consumed_airtime": "0.066816s",
+              "network_ids": {
+                "net_id": "000013",
+                "tenant_id": "ttn",
+                "cluster_id": "eu1",
+                "cluster_address": "eu1.cloud.thethings.network"
+              }
+            }
+          },
+          "topic": "v3/fhnw-idb@ttn/devices/fhnw-idb-device-0/up"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "IF CO2 > 1'000ppm": {
+      "main": [
+        [
+          {
+            "node": "Philips Hue set red",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Philips Hue get light status": {
+      "main": [
+        [
+          {
+            "node": "Is light on?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is light on?": {
+      "main": [
+        [
+          {
+            "node": "IF CO2 > 1'000ppm",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "IF CO2 < 600ppm",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF CO2 < 600ppm": {
+      "main": [
+        [
+          {
+            "node": "Philips Hue set white",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF value outside of range 600-1000": {
+      "main": [
+        [
+          {
+            "node": "Philips Hue get light status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MQTT New Measurement": {
+      "main": [
+        [
+          {
+            "node": "IF value outside of range 600-1000",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "3ee86082-bebd-4c41-887e-63c3ee72d9e1",
+  "id": "3",
+  "meta": {
+    "instanceId": "a7fdd0469b1307c28316088a2ece88cf183acf2c5d951b914562a6010c2a9d93"
+  },
+  "tags": []
+}
